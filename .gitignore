@@ -1,0 +1,17 @@
+# Dependencias
+node_modules/
+
+# Entorno local
+.env
+.env.local
+
+# Archivos temporales y de bloqueo de SQLite (CRUCIAL IGNORAR ESTOS)
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite-journal
+
+# Builds y temporales
+dist/
+build/
+.DS_Store
+*.log
