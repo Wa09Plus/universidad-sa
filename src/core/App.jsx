@@ -1,122 +1,153 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+// src/core/App.jsx - Shell principal: login, menú lateral por rol y enrutado de módulos
+import { useState } from 'react';
+import './App.css';
+import { setToken } from './api.js';
 
-function App() {
-  const [count, setCount] = useState(0)
+import AuthIU from '../features/auth/authIU.jsx';
+import ExpedientesIU from '../features/expedientes/expedientesIU.jsx';
+import ComentariosIU from '../features/comentarios/comentariosIU.jsx';
+import EstudiantesIU from '../features/estudiantes/estudiantesIU.jsx';
+import ReportesIU from '../features/reportes/reportesIU.jsx';
+import PerfilIU from '../features/perfil/perfilIU.jsx';
+
+// Cada módulo declara qué roles pueden verlo
+const MODULOS = [
+  {
+    id: 'expedientes',
+    icono: '📚',
+    titulo: 'Expedientes',
+    descripcion: 'Consulta calificaciones y datos académicos.',
+    roles: ['admin', 'estudiante'],
+    Componente: ExpedientesIU
+  },
+  {
+    id: 'comentarios',
+    icono: '💬',
+    titulo: 'Foro de consultas',
+    descripcion: 'Publica dudas y revisa los mensajes de la comunidad.',
+    roles: ['admin', 'estudiante'],
+    Componente: ComentariosIU
+  },
+  {
+    id: 'estudiantes',
+    icono: '🔎',
+    titulo: 'Estudiantes',
+    descripcion: 'Busca estudiantes y revisa su información completa.',
+    roles: ['admin'],
+    Componente: EstudiantesIU
+  },
+  {
+    id: 'reportes',
+    icono: '📊',
+    titulo: 'Reportes',
+    descripcion: 'Genera reportes de notas, estudiantes y usuarios.',
+    roles: ['admin'],
+    Componente: ReportesIU
+  },
+  {
+    id: 'perfil',
+    icono: '👤',
+    titulo: 'Mi perfil',
+    descripcion: 'Información de tu cuenta de usuario y tus datos de estudiante.',
+    roles: ['admin', 'estudiante'],
+    Componente: PerfilIU
+  }
+];
+
+function Bienvenida({ user, modulos, onNavegar }) {
+  const hora = new Date().getHours();
+  const saludo = hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches';
 
   return (
     <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      <div className="welcome-hero">
+        <h2>{saludo}, {user.username} 👋</h2>
+        <p>Bienvenido al Portal Universitario. Selecciona un módulo para comenzar.</p>
+        <span className="badge">
+          {user.rol}{user.carnet ? ` · Carnet ${user.carnet}` : ''}
+        </span>
+      </div>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+      <div className="module-grid">
+        {modulos.map((m) => (
+          <button key={m.id} className="card module-card" onClick={() => onNavegar(m.id)}>
+            <div className="module-icon">{m.icono}</div>
+            <h3>{m.titulo}</h3>
+            <p>{m.descripcion}</p>
+          </button>
+        ))}
+      </div>
     </>
-  )
+  );
 }
 
-export default App
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [vista, setVista] = useState('inicio');
+
+  const handleLogin = (usuario, token) => {
+    setToken(token);
+    setUser(usuario);
+    setVista('inicio');
+  };
+
+  const handleLogout = () => {
+    setToken(null);
+    setUser(null);
+    setVista('inicio');
+  };
+
+  if (!user) return <AuthIU onLogin={handleLogin} />;
+
+  const modulosPermitidos = MODULOS.filter((m) => m.roles.includes(user.rol));
+  const moduloActivo = modulosPermitidos.find((m) => m.id === vista);
+
+  return (
+    <div className="layout">
+      <aside className="sidebar no-print">
+        <div className="sidebar-brand">
+          <span>🎓</span>
+          <span>Portal Universitario</span>
+        </div>
+
+        <ul className="menu">
+          <li>
+            <button
+              className={`menu-item ${vista === 'inicio' ? 'active' : ''}`}
+              onClick={() => setVista('inicio')}
+            >
+              <span className="menu-icon">🏠</span> Inicio
+            </button>
+          </li>
+          {modulosPermitidos.map((m) => (
+            <li key={m.id}>
+              <button
+                className={`menu-item ${vista === m.id ? 'active' : ''}`}
+                onClick={() => setVista(m.id)}
+              >
+                <span className="menu-icon">{m.icono}</span> {m.titulo}
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        <div className="sidebar-user">
+          <div className="avatar">{user.username.charAt(0)}</div>
+          <div className="sidebar-user-info">
+            <b>{user.username}</b>
+            <small>{user.rol}</small>
+          </div>
+          <button className="logout-btn" onClick={handleLogout} title="Cerrar sesión">⏻</button>
+        </div>
+      </aside>
+
+      <main className="content">
+        {moduloActivo ? (
+          <moduloActivo.Componente user={user} />
+        ) : (
+          <Bienvenida user={user} modulos={modulosPermitidos} onNavegar={setVista} />
+        )}
+      </main>
+    </div>
+  );
+}
