@@ -40,12 +40,6 @@ export default function ExpedientesIU({ user }) {
     : null;
 
   const handleGuardarNota = async (idAsignacion) => {
-    const notaNum = parseInt(nuevaNota, 10);
-    if (isNaN(notaNum) || notaNum < 0 || notaNum > 100) {
-      setError('Por favor ingresa una nota válida entre 0 y 100');
-      return;
-    }
-
     setGuardandoNota(true);
     setError('');
     try {
@@ -53,7 +47,7 @@ export default function ExpedientesIU({ user }) {
         method: 'PUT',
         body: {
           id_asignacion: idAsignacion,
-          calificacion: notaNum
+          calificacion: nuevaNota
         }
       });
 
@@ -155,13 +149,11 @@ export default function ExpedientesIU({ user }) {
                         {editandoAsignacion === r.id_asignacion ? (
                           <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                             <input
-                              type="number"
-                              min="0"
-                              max="100"
+                              type="text"
                               className="input"
-                              style={{ width: '75px', padding: '4px 8px' }}
+                              style={{ width: '80px', padding: '4px 8px' }}
                               value={nuevaNota}
-                              placeholder="0-100"
+                              placeholder="Nota"
                               onChange={(e) => setNuevaNota(e.target.value)}
                               autoFocus
                             />

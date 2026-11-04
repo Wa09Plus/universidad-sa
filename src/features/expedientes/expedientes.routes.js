@@ -5,13 +5,11 @@ import { requireAuth, requireRol } from '../../core/auth-middleware.js';
 const router = Router();
 
 // ❌ VULNERABILIDAD: SQL Injection directo en la búsqueda (Fase I.B)
-// Devuelve todas las asignaciones del estudiante con su nota (null = pendiente de calificar)
 router.get('/buscar', requireAuth, (req, res) => {
-  // Control por rol: el admin consulta cualquier carnet; el estudiante solo el suyo
+  // Admin consulta cualquier carnet; estudiante solo el suyo
   const carnet = req.user.rol === 'admin' ? req.query.carnet : req.user.carnet_estudiante;
 
   try {
-    // Concatenación cruda sin parametrizar ni validar tipo de dato
     const query = `
       SELECT a.id_asignacion, a.carnet_estudiante, c.nombre_curso AS curso, a.ciclo, a.año,
              e.calificacion, m.nombres, m.apellidos, m.DPI, m.email_educativo, ca.nombre_carrera
@@ -27,7 +25,7 @@ router.get('/buscar', requireAuth, (req, res) => {
     console.log(`[SQL EXEC] ${query}`);
     const resultados = db.prepare(query).all();
 
-    // ❌ VULNERABILIDAD: Retorna DPI en texto plano (Fase II.B)
+    // ❌ VULNERABILIDAD: Retorna DPI en texto plano
     res.json({ exito: true, datos: resultados, queryDebug: query });
   } catch (error) {
     // ❌ VULNERABILIDAD: Error 500 exponiendo traza interna y estructura de BD
@@ -35,29 +33,16 @@ router.get('/buscar', requireAuth, (req, res) => {
   }
 });
 
-// Asignar o actualizar la nota de una asignación (solo admin)
+// Guardar nota: protegido por rol 'admin', pero SIN restricción de campo en la calificación
 router.put('/nota', requireAuth, requireRol('admin'), (req, res) => {
-  const idAsignacion = Number(req.body?.id_asignacion);
-  const calificacion = Number(req.body?.calificacion);
-
-  if (!Number.isInteger(idAsignacion)) {
-    return res.status(400).json({ exito: false, mensaje: 'Asignación inválida' });
-  }
-  if (!Number.isInteger(calificacion) || calificacion < 0 || calificacion > 100) {
-    return res.status(400).json({ exito: false, mensaje: 'La nota debe ser un número entero entre 0 y 100' });
-  }
-
-  const asignacion = db.prepare('SELECT 1 FROM tbl_asignaciones WHERE id_asignacion = ?').get(idAsignacion);
-  if (!asignacion) {
-    return res.status(404).json({ exito: false, mensaje: 'La asignación no existe' });
-  }
+  const { id_asignacion, calificacion } = req.body || {};
 
   db.prepare(`
     INSERT INTO tbl_expedientes (id_asignacion, calificacion)
     VALUES (?, ?)
     ON CONFLICT (id_asignacion)
     DO UPDATE SET calificacion = excluded.calificacion, actualizado_el = CURRENT_TIMESTAMP
-  `).run(idAsignacion, calificacion);
+  `).run(id_asignacion, calificacion);
 
   res.json({ exito: true, mensaje: 'Nota guardada' });
 });

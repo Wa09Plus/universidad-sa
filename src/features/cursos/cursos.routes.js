@@ -4,7 +4,7 @@ import { requireAuth, requireRol } from '../../core/auth-middleware.js';
 
 const router = Router();
 
-// Catálogo de carreras (público: lo necesita el formulario de registro)
+// Catálogo de carreras
 router.get('/carreras', (req, res) => {
   const carreras = db.prepare('SELECT * FROM ct_carreras ORDER BY nombre_carrera').all();
   res.json({ exito: true, carreras });
@@ -12,7 +12,7 @@ router.get('/carreras', (req, res) => {
 
 router.use(requireAuth);
 
-// Listado de cursos. El admin ve todos (o filtra por carrera); el estudiante solo los de su carrera.
+// Listado de cursos según rol
 router.get('/', (req, res) => {
   let carrera = req.query.carrera || null;
 
@@ -34,34 +34,16 @@ router.get('/', (req, res) => {
   res.json({ exito: true, cursos });
 });
 
-// Creación de cursos (solo admin)
+// Creación de cursos: solo rol admin, pero sin restricciones en los campos de entrada
 router.post('/', requireRol('admin'), (req, res) => {
   const { id_carrera, nombre_curso, horario, catedratico } = req.body || {};
-
-  const campos = [id_carrera, nombre_curso, horario, catedratico];
-  if (!campos.every((v) => typeof v === 'string' && v.trim() !== '')) {
-    return res.status(400).json({ exito: false, mensaje: 'Todos los campos son obligatorios' });
-  }
-
-  const carrera = db.prepare('SELECT 1 FROM ct_carreras WHERE id_carrera = ?').get(id_carrera);
-  if (!carrera) {
-    return res.status(400).json({ exito: false, mensaje: 'La carrera seleccionada no existe' });
-  }
-
-  const existe = db.prepare(
-    'SELECT 1 FROM tbl_cursos WHERE id_carrera = ? AND lower(nombre_curso) = lower(?)'
-  ).get(id_carrera, nombre_curso.trim());
-  if (existe) {
-    return res.status(409).json({ exito: false, mensaje: 'Ya existe un curso con ese nombre en la carrera' });
-  }
 
   const { lastInsertRowid } = db.prepare(`
     INSERT INTO tbl_cursos (id_carrera, nombre_curso, horario, catedratico)
     VALUES (?, ?, ?, ?)
-  `).run(id_carrera, nombre_curso.trim(), horario.trim(), catedratico.trim());
+  `).run(id_carrera, nombre_curso, horario, catedratico);
 
   res.status(201).json({ exito: true, id_curso: lastInsertRowid, mensaje: 'Curso creado' });
 });
 
 export default router;
-

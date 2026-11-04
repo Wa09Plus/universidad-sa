@@ -6,7 +6,7 @@ const router = Router();
 
 // Información del usuario (tbl_usuario) y su estudiante vinculado (TM_estudiante)
 router.get('/:idUsuario', requireAuth, (req, res) => {
-  // Control por rol: un estudiante solo puede ver su propio perfil
+  // Control por rol: el estudiante solo puede ver su propio perfil
   if (req.user.rol !== 'admin' && String(req.user.id_usuario) !== req.params.idUsuario) {
     return res.status(403).json({ exito: false, mensaje: 'No tienes permisos para ver este perfil.' });
   }

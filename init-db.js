@@ -78,7 +78,7 @@ db.exec(`
   CREATE TABLE tbl_expedientes (
     id_expediente INTEGER PRIMARY KEY AUTOINCREMENT,
     id_asignacion INTEGER UNIQUE NOT NULL,
-    calificacion INTEGER NOT NULL CHECK (calificacion BETWEEN 0 AND 100),
+    calificacion INTEGER NOT NULL,
     actualizado_el DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_asignacion) REFERENCES tbl_asignaciones(id_asignacion) ON DELETE CASCADE
   );

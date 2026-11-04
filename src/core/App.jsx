@@ -134,6 +134,7 @@ export default function App() {
 
   if (!user) return <AuthIU onLogin={handleLogin} />;
 
+  // Filtrado estricto por roles
   const modulosPermitidos = MODULOS.filter((m) => m.roles.includes(user.rol));
   const moduloActivo = modulosPermitidos.find((m) => m.id === vista);
 
