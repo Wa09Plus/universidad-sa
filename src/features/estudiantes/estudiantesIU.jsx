@@ -1,4 +1,4 @@
-// src/features/estudiantes/estudiantesIU.jsx - Búsqueda de estudiantes (solo admin)
+﻿// src/features/estudiantes/estudiantesIU.jsx - Búsqueda de estudiantes (solo admin)
 import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
 import { api } from '../../core/api.js';
@@ -64,14 +64,14 @@ export default function EstudiantesIU() {
                 <tr><td colSpan="7" className="empty">No se encontraron estudiantes.</td></tr>
               ) : (
                 estudiantes.map((s) => (
-                  <tr key={s.carnet} className={detalle?.estudiante.carnet === s.carnet ? 'row-active' : ''}>
-                    <td>{s.carnet}</td>
+                  <tr key={s.carnet_estudiante} className={detalle?.estudiante?.carnet_estudiante === s.carnet_estudiante ? 'row-active' : ''}>
+                    <td><code>{s.carnet_estudiante}</code></td>
                     <td>{s.nombres} {s.apellidos}</td>
                     <td>{s.email_educativo}</td>
                     <td>{s.username || <span className="muted">Sin cuenta</span>}</td>
                     <td>{s.cursos}</td>
                     <td>{s.promedio ?? '—'}</td>
-                    <td><button className="btn btn-sm btn-ghost" onClick={() => verDetalle(s.carnet)}>Ver</button></td>
+                    <td><button className="btn btn-sm btn-ghost" onClick={() => verDetalle(s.carnet_estudiante)}>Ver</button></td>
                   </tr>
                 ))
               )}
@@ -90,7 +90,7 @@ export default function EstudiantesIU() {
           <div className="perfil-grid">
             <div>
               <h4 className="section-title">Tabla maestra</h4>
-              <div className="dato"><span className="dato-label">Carnet</span><span className="dato-valor">{detalle.estudiante.carnet}</span></div>
+              <div className="dato"><span className="dato-label">Carnet</span><span className="dato-valor">{detalle.estudiante.carnet_estudiante}</span></div>
               <div className="dato"><span className="dato-label">Correo</span><span className="dato-valor">{detalle.estudiante.email_educativo}</span></div>
               <div className="dato"><span className="dato-label">DPI</span><span className="dato-valor">{detalle.estudiante.DPI}</span></div>
             </div>
