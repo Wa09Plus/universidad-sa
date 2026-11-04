@@ -2,6 +2,16 @@
 import { useState } from 'react';
 import './App.css';
 import { setToken } from './api.js';
+import {
+  GraduationCap,
+  BookOpen,
+  MessageSquare,
+  Search,
+  BarChart3,
+  User as UserIcon,
+  Home,
+  LogOut
+} from 'lucide-react';
 
 import AuthIU from '../features/auth/authIU.jsx';
 import ExpedientesIU from '../features/expedientes/expedientesIU.jsx';
@@ -14,7 +24,7 @@ import PerfilIU from '../features/perfil/perfilIU.jsx';
 const MODULOS = [
   {
     id: 'expedientes',
-    icono: '📚',
+    Icon: BookOpen,
     titulo: 'Expedientes',
     descripcion: 'Consulta calificaciones y datos académicos.',
     roles: ['admin', 'estudiante'],
@@ -22,7 +32,7 @@ const MODULOS = [
   },
   {
     id: 'comentarios',
-    icono: '💬',
+    Icon: MessageSquare,
     titulo: 'Foro de consultas',
     descripcion: 'Publica dudas y revisa los mensajes de la comunidad.',
     roles: ['admin', 'estudiante'],
@@ -30,7 +40,7 @@ const MODULOS = [
   },
   {
     id: 'estudiantes',
-    icono: '🔎',
+    Icon: Search,
     titulo: 'Estudiantes',
     descripcion: 'Busca estudiantes y revisa su información completa.',
     roles: ['admin'],
@@ -38,7 +48,7 @@ const MODULOS = [
   },
   {
     id: 'reportes',
-    icono: '📊',
+    Icon: BarChart3,
     titulo: 'Reportes',
     descripcion: 'Genera reportes de notas, estudiantes y usuarios.',
     roles: ['admin'],
@@ -46,7 +56,7 @@ const MODULOS = [
   },
   {
     id: 'perfil',
-    icono: '👤',
+    Icon: UserIcon,
     titulo: 'Mi perfil',
     descripcion: 'Información de tu cuenta de usuario y tus datos de estudiante.',
     roles: ['admin', 'estudiante'],
@@ -61,7 +71,7 @@ function Bienvenida({ user, modulos, onNavegar }) {
   return (
     <>
       <div className="welcome-hero">
-        <h2>{saludo}, {user.username} 👋</h2>
+        <h2>{saludo}, {user.username}</h2>
         <p>Bienvenido al Portal Universitario. Selecciona un módulo para comenzar.</p>
         <span className="badge">
           {user.rol}{user.carnet ? ` · Carnet ${user.carnet}` : ''}
@@ -69,13 +79,18 @@ function Bienvenida({ user, modulos, onNavegar }) {
       </div>
 
       <div className="module-grid">
-        {modulos.map((m) => (
-          <button key={m.id} className="card module-card" onClick={() => onNavegar(m.id)}>
-            <div className="module-icon">{m.icono}</div>
-            <h3>{m.titulo}</h3>
-            <p>{m.descripcion}</p>
-          </button>
-        ))}
+        {modulos.map((m) => {
+          const Icon = m.Icon;
+          return (
+            <button key={m.id} className="card module-card" onClick={() => onNavegar(m.id)}>
+              <div className="module-icon">
+                <Icon size={24} />
+              </div>
+              <h3>{m.titulo}</h3>
+              <p>{m.descripcion}</p>
+            </button>
+          );
+        })}
       </div>
     </>
   );
@@ -106,7 +121,7 @@ export default function App() {
     <div className="layout">
       <aside className="sidebar no-print">
         <div className="sidebar-brand">
-          <span>🎓</span>
+          <GraduationCap size={24} />
           <span>Portal Universitario</span>
         </div>
 
@@ -116,19 +131,22 @@ export default function App() {
               className={`menu-item ${vista === 'inicio' ? 'active' : ''}`}
               onClick={() => setVista('inicio')}
             >
-              <span className="menu-icon">🏠</span> Inicio
+              <span className="menu-icon"><Home size={18} /></span> Inicio
             </button>
           </li>
-          {modulosPermitidos.map((m) => (
-            <li key={m.id}>
-              <button
-                className={`menu-item ${vista === m.id ? 'active' : ''}`}
-                onClick={() => setVista(m.id)}
-              >
-                <span className="menu-icon">{m.icono}</span> {m.titulo}
-              </button>
-            </li>
-          ))}
+          {modulosPermitidos.map((m) => {
+            const Icon = m.Icon;
+            return (
+              <li key={m.id}>
+                <button
+                  className={`menu-item ${vista === m.id ? 'active' : ''}`}
+                  onClick={() => setVista(m.id)}
+                >
+                  <span className="menu-icon"><Icon size={18} /></span> {m.titulo}
+                </button>
+              </li>
+            );
+          })}
         </ul>
 
         <div className="sidebar-user">
@@ -137,7 +155,9 @@ export default function App() {
             <b>{user.username}</b>
             <small>{user.rol}</small>
           </div>
-          <button className="logout-btn" onClick={handleLogout} title="Cerrar sesión">⏻</button>
+          <button className="logout-btn" onClick={handleLogout} title="Cerrar sesión">
+            <LogOut size={18} />
+          </button>
         </div>
       </aside>
 

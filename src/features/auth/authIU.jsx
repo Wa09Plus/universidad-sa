@@ -1,5 +1,6 @@
 // src/features/auth/authIU.jsx - Pantallas de inicio de sesión y registro
 import { useState } from 'react';
+import { GraduationCap } from 'lucide-react';
 import { api } from '../../core/api.js';
 import RegistroIU from './registroIU.jsx';
 
@@ -37,7 +38,9 @@ export default function AuthIU({ onLogin }) {
     <div className="login-screen">
       <div className="card login-card">
         <div className="login-brand">
-          <div className="login-logo">🎓</div>
+          <div className="login-logo">
+            <GraduationCap size={32} />
+          </div>
           <h1>Portal Universitario</h1>
           <p>{modo === 'login' ? 'Ingresa con tu usuario institucional' : 'Crea tu cuenta de estudiante'}</p>
         </div>

@@ -1,5 +1,6 @@
 // src/features/reportes/reportesIU.jsx - Generación de reportes (solo admin)
 import { useEffect, useState } from 'react';
+import { BarChart3, Download, Printer } from 'lucide-react';
 import { api } from '../../core/api.js';
 
 const REPORTES = {
@@ -70,7 +71,10 @@ export default function ReportesIU() {
   return (
     <>
       <div className="page-header no-print">
-        <h2>📊 Reportes</h2>
+        <h2>
+          <span className="page-header-icon"><BarChart3 size={24} /></span>
+          Reportes
+        </h2>
         <p>Genera, exporta o imprime reportes de notas, estudiantes y usuarios.</p>
       </div>
 
@@ -93,8 +97,12 @@ export default function ReportesIU() {
               <small className="muted">Generado el {new Date().toLocaleString('es-GT')}</small>
             </div>
             <div className="toolbar no-print" style={{ marginBottom: 0 }}>
-              <button className="btn btn-ghost" onClick={() => exportarCSV(tipo, def.columnas, datos.filas)}>⬇ Exportar CSV</button>
-              <button className="btn" onClick={() => window.print()}>🖨 Imprimir</button>
+              <button className="btn btn-ghost btn-with-icon" onClick={() => exportarCSV(tipo, def.columnas, datos.filas)}>
+                <Download size={16} /> Exportar CSV
+              </button>
+              <button className="btn btn-with-icon" onClick={() => window.print()}>
+                <Printer size={16} /> Imprimir
+              </button>
             </div>
           </div>
 

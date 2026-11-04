@@ -1,5 +1,6 @@
 // src/features/perfil/perfilIU.jsx - Información del usuario y del alumno
 import { useEffect, useState } from 'react';
+import { User, GraduationCap } from 'lucide-react';
 import { api } from '../../core/api.js';
 
 function Dato({ etiqueta, valor }) {
@@ -34,7 +35,10 @@ export default function PerfilIU({ user }) {
   return (
     <>
       <div className="page-header">
-        <h2>👤 Mi perfil</h2>
+        <h2>
+          <span className="page-header-icon"><User size={24} /></span>
+          Mi perfil
+        </h2>
         <p>Información de tu cuenta y de tu registro como estudiante.</p>
       </div>
 
@@ -62,7 +66,9 @@ export default function PerfilIU({ user }) {
 
           <div className="card">
             <div className="perfil-head">
-              <div className="avatar avatar-lg">🎓</div>
+              <div className="avatar avatar-lg">
+                <GraduationCap size={24} />
+              </div>
               <div>
                 <h3>{e ? `${e.nombres} ${e.apellidos}` : 'Sin estudiante vinculado'}</h3>
                 {e && <span className="badge badge-soft">Carnet {e.carnet}</span>}

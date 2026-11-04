@@ -1,5 +1,6 @@
 // src/features/comentarios/comentariosIU.jsx - Foro de consultas
 import { useEffect, useState } from 'react';
+import { MessageSquare, Send } from 'lucide-react';
 import { api } from '../../core/api.js';
 
 export default function ComentariosIU({ user }) {
@@ -45,7 +46,10 @@ export default function ComentariosIU({ user }) {
   return (
     <>
       <div className="page-header">
-        <h2>💬 Foro de consultas</h2>
+        <h2>
+          <span className="page-header-icon"><MessageSquare size={24} /></span>
+          Foro de consultas
+        </h2>
         <p>Publica dudas y revisa los mensajes de la comunidad.</p>
       </div>
 
@@ -82,7 +86,9 @@ export default function ComentariosIU({ user }) {
             />
           </div>
           {error && <div className="alert alert-error">{error}</div>}
-          <button className="btn" type="submit">Publicar mensaje</button>
+          <button className="btn btn-with-icon" type="submit">
+            <Send size={16} /> Publicar mensaje
+          </button>
         </form>
 
         <div className="comment-list">

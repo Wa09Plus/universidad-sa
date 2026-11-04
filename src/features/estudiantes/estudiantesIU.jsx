@@ -1,5 +1,6 @@
 // src/features/estudiantes/estudiantesIU.jsx - Búsqueda de estudiantes (solo admin)
 import { useEffect, useState } from 'react';
+import { Search } from 'lucide-react';
 import { api } from '../../core/api.js';
 
 export default function EstudiantesIU() {
@@ -28,14 +29,19 @@ export default function EstudiantesIU() {
   return (
     <>
       <div className="page-header">
-        <h2>🔎 Búsqueda de estudiantes</h2>
+        <h2>
+          <span className="page-header-icon"><Search size={24} /></span>
+          Búsqueda de estudiantes
+        </h2>
         <p>Busca por carnet, nombre, apellido o correo educativo.</p>
       </div>
 
       <div className="card">
         <form className="toolbar" onSubmit={(e) => { e.preventDefault(); buscar(); }}>
           <input className="input" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar estudiante..." />
-          <button className="btn" type="submit">Buscar</button>
+          <button className="btn btn-with-icon" type="submit">
+            <Search size={16} /> Buscar
+          </button>
         </form>
 
         {error && <div className="alert alert-error">{error}</div>}

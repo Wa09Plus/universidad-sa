@@ -1,5 +1,6 @@
 // src/features/expedientes/expedientesIU.jsx - Consulta de expedientes académicos
 import { useEffect, useState } from 'react';
+import { BookOpen, Search } from 'lucide-react';
 import { api } from '../../core/api.js';
 
 export default function ExpedientesIU({ user }) {
@@ -33,7 +34,10 @@ export default function ExpedientesIU({ user }) {
   return (
     <>
       <div className="page-header">
-        <h2>📚 Expedientes académicos</h2>
+        <h2>
+          <span className="page-header-icon"><BookOpen size={24} /></span>
+          Expedientes académicos
+        </h2>
         <p>{esAdmin ? 'Consulta las calificaciones de cualquier estudiante por carnet.' : 'Tus calificaciones registradas.'}</p>
       </div>
 
@@ -46,7 +50,9 @@ export default function ExpedientesIU({ user }) {
               onChange={(e) => setCarnet(e.target.value)}
               placeholder="Número de carnet"
             />
-            <button className="btn" type="submit">Consultar</button>
+            <button className="btn btn-with-icon" type="submit">
+              <Search size={16} /> Consultar
+            </button>
           </form>
         )}
 
