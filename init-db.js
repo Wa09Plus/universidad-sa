@@ -58,7 +58,7 @@ db.exec(`
   );
 `);
 
-console.log('🌱 Sembrando datos iniciales...');
+console.log('Sembrando datos iniciales...');
 
 const insertEstudiante = db.prepare(`
   INSERT INTO TM_estudiante (carnet, nombres, apellidos, email_educativo, DPI)
