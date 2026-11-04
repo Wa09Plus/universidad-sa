@@ -23,9 +23,11 @@ router.get('/:idUsuario', requireAuth, (req, res) => {
 
   const estudiante = usuario.carnet_estudiante
     ? db.prepare(`
-        SELECT id_estudiante, carnet, nombres, apellidos, email_educativo, DPI
-        FROM TM_estudiante
-        WHERE carnet = ?
+        SELECT m.id_estudiante, m.carnet_estudiante, m.nombres, m.apellidos, m.email_educativo, m.DPI,
+               m.id_carrera, ca.nombre_carrera, ca.jornada, ca.sede
+        FROM TM_estudiante m
+        JOIN ct_carreras ca ON ca.id_carrera = m.id_carrera
+        WHERE m.carnet_estudiante = ?
       `).get(usuario.carnet_estudiante)
     : null;
 

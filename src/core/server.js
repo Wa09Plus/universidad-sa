@@ -8,6 +8,8 @@ import comentariosRouter from '../features/comentarios/comentarios.routes.js';
 import perfilRouter from '../features/perfil/perfil.routes.js';
 import estudiantesRouter from '../features/estudiantes/estudiantes.routes.js';
 import reportesRouter from '../features/reportes/reportes.routes.js';
+import cursosRouter from '../features/cursos/cursos.routes.js';
+import asignacionesRouter from '../features/asignaciones/asignaciones.routes.js';
 
 dotenv.config();
 
@@ -32,6 +34,8 @@ app.use('/api/comentarios', comentariosRouter);
 app.use('/api/perfil', perfilRouter);
 app.use('/api/estudiantes', estudiantesRouter);
 app.use('/api/reportes', reportesRouter);
+app.use('/api/cursos', cursosRouter);
+app.use('/api/asignaciones', asignacionesRouter);
 
 app.listen(PORT, () => {
   console.log(`🔥 Servidor VULNERABLE escuchando en http://localhost:${PORT}`);

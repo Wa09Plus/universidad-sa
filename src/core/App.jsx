@@ -10,7 +10,9 @@ import {
   BarChart3,
   User as UserIcon,
   Home,
-  LogOut
+  LogOut,
+  BookPlus,
+  UserCheck
 } from 'lucide-react';
 
 import AuthIU from '../features/auth/authIU.jsx';
@@ -19,14 +21,32 @@ import ComentariosIU from '../features/comentarios/comentariosIU.jsx';
 import EstudiantesIU from '../features/estudiantes/estudiantesIU.jsx';
 import ReportesIU from '../features/reportes/reportesIU.jsx';
 import PerfilIU from '../features/perfil/perfilIU.jsx';
+import CursosIU from '../features/cursos/cursosIU.jsx';
+import AsignacionesIU from '../features/asignaciones/asignacionesIU.jsx';
 
 // Cada módulo declara qué roles pueden verlo
 const MODULOS = [
   {
+    id: 'cursos',
+    Icon: BookPlus,
+    titulo: 'Cursos',
+    descripcion: 'Catálogo y creación de cursos por carrera.',
+    roles: ['admin', 'estudiante'],
+    Componente: CursosIU
+  },
+  {
+    id: 'asignaciones',
+    Icon: UserCheck,
+    titulo: 'Asignaciones',
+    descripcion: 'Asignación de cursos semestrales para estudiantes.',
+    roles: ['admin', 'estudiante'],
+    Componente: AsignacionesIU
+  },
+  {
     id: 'expedientes',
     Icon: BookOpen,
     titulo: 'Expedientes',
-    descripcion: 'Consulta calificaciones y datos académicos.',
+    descripcion: 'Consulta calificaciones y gestión de notas docentes.',
     roles: ['admin', 'estudiante'],
     Componente: ExpedientesIU
   },
@@ -50,7 +70,7 @@ const MODULOS = [
     id: 'reportes',
     Icon: BarChart3,
     titulo: 'Reportes',
-    descripcion: 'Genera reportes de notas, estudiantes y usuarios.',
+    descripcion: 'Genera reportes de notas, estudiantes, cursos y usuarios.',
     roles: ['admin'],
     Componente: ReportesIU
   },

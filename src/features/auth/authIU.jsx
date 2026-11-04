@@ -89,7 +89,7 @@ export default function AuthIU({ onLogin }) {
 
             <div className="login-hint">
               Usuarios de prueba:<br />
-              <code>admin</code> / <code>admin123</code> · <code>cmendoza</code> / <code>password</code>
+              <code>admin</code> / <code>admin123</code> · <code>cmendoza</code> / <code>carlos2026</code> · <code>salvarez</code> / <code>sofia2026</code>
             </div>
           </form>
         )}
@@ -97,3 +97,4 @@ export default function AuthIU({ onLogin }) {
     </div>
   );
 }
+

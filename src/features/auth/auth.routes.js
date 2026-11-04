@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import crypto from 'crypto';
 import db from '../../../database/connection.js';
 
 const router = Router();
@@ -13,11 +12,9 @@ router.post('/login', (req, res) => {
   // ❌ VULNERABILIDAD: Logging inseguro exponiendo contraseñas en claro (Fase II.E)
   console.log(`[INSECURE LOG - LOGIN] Intento de acceso: Usuario="${username}", Password="${pass}"`);
 
-  // ❌ VULNERABILIDAD: Hashing rápido con SHA-256 sin sal ni factor de costo KDF (Fase II.A)
-  const hashInseguro = crypto.createHash('sha256').update(pass || '').digest('hex');
-
+  // ❌ VULNERABILIDAD: Contraseñas almacenadas y comparadas en texto plano, sin hash (Fase II.A)
   const usuario = db.prepare(
-    `SELECT * FROM tbl_usuario WHERE username = '${username}' AND pass = '${hashInseguro}'`
+    `SELECT * FROM tbl_usuario WHERE username = '${username}' AND pass = '${pass}'`
   ).get();
 
   if (!usuario) {
@@ -38,11 +35,12 @@ router.post('/login', (req, res) => {
   });
 });
 
-// Registro de estudiante nuevo: crea su registro en la tabla maestra y su cuenta de usuario
+// Registro de estudiante nuevo: elige su carrera y el sistema genera el carnet
+// con el formato carrera-año-correlativo (ej. 0904-26-003)
 router.post('/registro', (req, res) => {
-  const { carnet, nombres, apellidos, email, DPI, username, pass } = req.body || {};
+  const { id_carrera, nombres, apellidos, email, DPI, username, pass } = req.body || {};
 
-  const campos = [carnet, nombres, apellidos, email, DPI, username, pass];
+  const campos = [id_carrera, nombres, apellidos, email, DPI, username, pass];
   if (!campos.every((v) => typeof v === 'string' && v.trim() !== '')) {
     return res.status(400).json({ exito: false, mensaje: 'Todos los campos son obligatorios' });
   }
@@ -50,9 +48,9 @@ router.post('/registro', (req, res) => {
     return res.status(400).json({ exito: false, mensaje: 'La contraseña debe tener al menos 6 caracteres' });
   }
 
-  const carnetExiste = db.prepare('SELECT 1 FROM TM_estudiante WHERE carnet = ?').get(carnet.trim());
-  if (carnetExiste) {
-    return res.status(409).json({ exito: false, mensaje: 'El carnet ya está registrado' });
+  const carrera = db.prepare('SELECT id_carrera FROM ct_carreras WHERE id_carrera = ?').get(id_carrera);
+  if (!carrera) {
+    return res.status(400).json({ exito: false, mensaje: 'La carrera seleccionada no existe' });
   }
 
   const usuarioExiste = db.prepare('SELECT 1 FROM tbl_usuario WHERE username = ?').get(username.trim());
@@ -60,23 +58,39 @@ router.post('/registro', (req, res) => {
     return res.status(409).json({ exito: false, mensaje: 'El nombre de usuario ya está en uso' });
   }
 
-  // Mismo esquema de hash que usa /login para que la cuenta pueda iniciar sesión
-  const hash = crypto.createHash('sha256').update(pass).digest('hex');
+  const año = String(new Date().getFullYear()).slice(-2);
+  const prefijo = `${id_carrera}-${año}-`;
 
   const registrar = db.transaction(() => {
-    db.prepare(`
-      INSERT INTO TM_estudiante (carnet, nombres, apellidos, email_educativo, DPI)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(carnet.trim(), nombres.trim(), apellidos.trim(), email.trim(), DPI.trim());
+    // Siguiente correlativo disponible para esa carrera y año
+    const { ultimo } = db.prepare(`
+      SELECT MAX(CAST(substr(carnet_estudiante, ?) AS INTEGER)) AS ultimo
+      FROM TM_estudiante
+      WHERE carnet_estudiante LIKE ?
+    `).get(prefijo.length + 1, `${prefijo}%`);
 
+    const carnet = `${prefijo}${String((ultimo || 0) + 1).padStart(3, '0')}`;
+
+    db.prepare(`
+      INSERT INTO TM_estudiante (carnet_estudiante, nombres, apellidos, email_educativo, DPI, id_carrera)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(carnet, nombres.trim(), apellidos.trim(), email.trim(), DPI.trim(), id_carrera);
+
+    // Se guarda en texto plano para ser consistente con /login
     db.prepare(`
       INSERT INTO tbl_usuario (carnet_estudiante, username, email, pass, rol)
       VALUES (?, ?, ?, ?, 'estudiante')
-    `).run(carnet.trim(), username.trim(), email.trim(), hash);
+    `).run(carnet, username.trim(), email.trim(), pass);
+
+    return carnet;
   });
 
-  registrar();
-  res.status(201).json({ exito: true, mensaje: 'Cuenta creada correctamente. Ya puedes iniciar sesión.' });
+  const carnet = registrar();
+  res.status(201).json({
+    exito: true,
+    carnet,
+    mensaje: `Cuenta creada correctamente. Tu carnet es ${carnet}. Ya puedes iniciar sesión.`
+  });
 });
 
 export default router;
