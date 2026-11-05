@@ -42,7 +42,6 @@ const buscarExpedientes = (req, res) => {
 
 router.get('/buscar', authFlexible, buscarExpedientes);
 
-// Guardar nota: protegido por rol 'admin', pero SIN restricción de campo en la calificación
 router.put('/nota', requireAuth, requireRol('admin'), (req, res) => {
   const { id_asignacion, calificacion } = req.body || {};
 

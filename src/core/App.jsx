@@ -12,8 +12,7 @@ import {
   Home,
   LogOut,
   BookPlus,
-  UserCheck,
-  Terminal
+  UserCheck
 } from 'lucide-react';
 
 import AuthIU from '../features/auth/authIU.jsx';
@@ -24,7 +23,6 @@ import ReportesIU from '../features/reportes/reportesIU.jsx';
 import PerfilIU from '../features/perfil/perfilIU.jsx';
 import CursosIU from '../features/cursos/cursosIU.jsx';
 import AsignacionesIU from '../features/asignaciones/asignacionesIU.jsx';
-import SistemaIU from '../features/sistema/sistemaIU.jsx';
 
 // Cada módulo declara qué roles pueden verlo
 const MODULOS = [
@@ -83,14 +81,6 @@ const MODULOS = [
     descripcion: 'Información de tu cuenta de usuario y tus datos de estudiante.',
     roles: ['admin', 'estudiante'],
     Componente: PerfilIU
-  },
-  {
-    id: 'sistema',
-    Icon: Terminal,
-    titulo: 'Diagnóstico de Red',
-    descripcion: 'Herramienta de conectividad y comprobación de red.',
-    roles: ['admin', 'estudiante'],
-    Componente: SistemaIU
   }
 ];
 

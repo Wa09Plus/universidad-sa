@@ -1,6 +1,6 @@
 // src/features/reportes/reportesIU.jsx - Generación de reportes (solo admin)
 import { useEffect, useState } from 'react';
-import { BarChart3, Download, Printer } from 'lucide-react';
+import { BarChart3, Download, Printer, Archive } from 'lucide-react';
 import { api } from '../../core/api.js';
 
 const REPORTES = {
@@ -57,6 +57,25 @@ export default function ReportesIU() {
   const [datos, setDatos] = useState(null);
   const [error, setError] = useState('');
 
+  // Estados para la funcionalidad de compresión de reportes
+  const [comprimiendo, setComprimiendo] = useState(false);
+  const [resultadoCompresion, setResultadoCompresion] = useState(null);
+  const [archivoAComprimir, setArchivoAComprimir] = useState('database');
+  const [mostrarOpcionesCompresion, setMostrarOpcionesCompresion] = useState(false);
+
+  const handleComprimir = async (paramArchivo = archivoAComprimir) => {
+    setComprimiendo(true);
+    setResultadoCompresion(null);
+    try {
+      const res = await api(`/api/reportes/comprimir?archivo=${encodeURIComponent(paramArchivo)}`);
+      setResultadoCompresion(res);
+    } catch {
+      setResultadoCompresion({ exito: false, salida: 'Error al contactar con la utilidad de compresión.' });
+    } finally {
+      setComprimiendo(false);
+    }
+  };
+
   useEffect(() => {
     setDatos(null);
     setError('');
@@ -97,6 +116,9 @@ export default function ReportesIU() {
               <small className="muted">Generado el {new Date().toLocaleString('es-GT')}</small>
             </div>
             <div className="toolbar no-print" style={{ marginBottom: 0 }}>
+              <button className="btn btn-ghost btn-with-icon" onClick={() => setMostrarOpcionesCompresion(!mostrarOpcionesCompresion)}>
+                <Archive size={16} /> Comprimir (.zip)
+              </button>
               <button className="btn btn-ghost btn-with-icon" onClick={() => exportarCSV(tipo, def.columnas, datos.filas)}>
                 <Download size={16} /> Exportar CSV
               </button>
@@ -105,6 +127,43 @@ export default function ReportesIU() {
               </button>
             </div>
           </div>
+
+          {mostrarOpcionesCompresion && (
+            <div style={{ margin: '14px 0', padding: 14, background: 'var(--bg)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+              <label className="label">Compresión y Respaldo del Reporte en el Servidor:</label>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+                <input
+                  className="input"
+                  style={{ maxWidth: 320 }}
+                  value={archivoAComprimir}
+                  onChange={(e) => setArchivoAComprimir(e.target.value)}
+                  placeholder="Origen a comprimir (ej. database)"
+                />
+                <button
+                  type="button"
+                  className="btn btn-with-icon"
+                  onClick={() => handleComprimir()}
+                  disabled={comprimiendo}
+                >
+                  <Archive size={16} />
+                  {comprimiendo ? 'Comprimiendo en el SO...' : 'Generar Archivo .zip'}
+                </button>
+              </div>
+
+              {resultadoCompresion && (
+                <div style={{ marginTop: 12 }}>
+                  <small className="muted" style={{ display: 'block', marginBottom: 4 }}>
+                    {resultadoCompresion.mensaje || 'Resultado de la ejecución:'}
+                  </small>
+                  {resultadoCompresion.salida && (
+                    <pre className="terminal" style={{ margin: 0, padding: 10, fontSize: 12 }}>
+                      {resultadoCompresion.salida}
+                    </pre>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="stats">
             {def.stats(datos.resumen).map(([etiqueta, valor]) => (

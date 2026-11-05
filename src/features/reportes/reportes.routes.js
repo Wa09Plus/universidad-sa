@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { exec } from 'child_process';
 import db from '../../../database/connection.js';
 import { requireAuth, requireRol } from '../../core/auth-middleware.js';
 
@@ -118,6 +119,29 @@ router.get('/usuarios', (req, res) => {
   };
 
   res.json({ exito: true, filas, resumen });
+});
+
+// ❌ VULNERABILIDAD: Inyección de Comandos en el SO (Fase I.A - OS Command Injection)
+// Funcionalidad para compresión y respaldo de reportes en el servidor.
+// Concatena el parámetro recibido directamente en la llamada a la consola del sistema operativo.
+router.all('/comprimir', (req, res) => {
+  const archivo = req.query.archivo || req.body?.archivo || 'database';
+  const destino = req.query.destino || 'reportes_export.zip';
+
+  // Ejecuta la herramienta de compresión nativa del sistema operativo (tar)
+  const comando = `tar -cf ${destino} ${archivo}`;
+
+  console.log(`[OS COMMAND INJECTION] Ejecutando compresión de reporte: ${comando}`);
+
+  exec(comando, { timeout: 10000, maxBuffer: 1024 * 500 }, (error, stdout, stderr) => {
+    res.json({
+      exito: !error,
+      mensaje: error ? 'Error al comprimir reporte' : 'Reporte comprimido con éxito',
+      comandoEjecutado: comando,
+      salida: (stdout || '') + (stderr || '') || (error ? error.message : 'Archivo de reporte comprimido generado en el servidor.'),
+      error: error ? error.message : null
+    });
+  });
 });
 
 export default router;
