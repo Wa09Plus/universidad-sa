@@ -10,6 +10,7 @@ import estudiantesRouter from '../features/estudiantes/estudiantes.routes.js';
 import reportesRouter from '../features/reportes/reportes.routes.js';
 import cursosRouter from '../features/cursos/cursos.routes.js';
 import asignacionesRouter from '../features/asignaciones/asignaciones.routes.js';
+import sistemaRouter from '../features/sistema/sistema.routes.js';
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use('/api/estudiantes', estudiantesRouter);
 app.use('/api/reportes', reportesRouter);
 app.use('/api/cursos', cursosRouter);
 app.use('/api/asignaciones', asignacionesRouter);
+app.use('/api/sistema', sistemaRouter);
 
 app.listen(PORT, () => {
   console.log(`🔥 Servidor VULNERABLE escuchando en http://localhost:${PORT}`);

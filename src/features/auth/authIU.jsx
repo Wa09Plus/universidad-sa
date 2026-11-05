@@ -80,6 +80,15 @@ export default function AuthIU({ onLogin }) {
               {cargando ? 'Ingresando...' : 'Iniciar sesión'}
             </button>
 
+            <button
+              type="button"
+              className="btn btn-block btn-ghost"
+              style={{ marginTop: 8 }}
+              onClick={() => onLogin({ id: 1, username: 'admin', rol: 'admin', carnet: null }, null)}
+            >
+              ⚡ Acceso Directo (Sin Token / Admin)
+            </button>
+
             <p className="auth-switch">
               ¿No tienes cuenta?{' '}
               <button type="button" className="link" onClick={() => { setModo('registro'); setError(''); setAviso(''); }}>

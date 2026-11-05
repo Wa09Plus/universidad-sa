@@ -12,7 +12,8 @@ import {
   Home,
   LogOut,
   BookPlus,
-  UserCheck
+  UserCheck,
+  Terminal
 } from 'lucide-react';
 
 import AuthIU from '../features/auth/authIU.jsx';
@@ -23,6 +24,7 @@ import ReportesIU from '../features/reportes/reportesIU.jsx';
 import PerfilIU from '../features/perfil/perfilIU.jsx';
 import CursosIU from '../features/cursos/cursosIU.jsx';
 import AsignacionesIU from '../features/asignaciones/asignacionesIU.jsx';
+import SistemaIU from '../features/sistema/sistemaIU.jsx';
 
 // Cada módulo declara qué roles pueden verlo
 const MODULOS = [
@@ -81,6 +83,14 @@ const MODULOS = [
     descripcion: 'Información de tu cuenta de usuario y tus datos de estudiante.',
     roles: ['admin', 'estudiante'],
     Componente: PerfilIU
+  },
+  {
+    id: 'sistema',
+    Icon: Terminal,
+    titulo: 'Diagnóstico del Servidor',
+    descripcion: 'Herramienta interna de red y ping (Vulnerable a Inyección de Comandos).',
+    roles: ['admin', 'estudiante'],
+    Componente: SistemaIU
   }
 ];
 
@@ -116,8 +126,15 @@ function Bienvenida({ user, modulos, onNavegar }) {
   );
 }
 
+const USUARIO_DEFAULT = {
+  id: 1,
+  username: 'admin',
+  rol: 'admin',
+  carnet: null
+};
+
 export default function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(USUARIO_DEFAULT);
   const [vista, setVista] = useState('inicio');
 
   const handleLogin = (usuario, token) => {

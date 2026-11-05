@@ -4,10 +4,23 @@ import { requireAuth, requireRol } from '../../core/auth-middleware.js';
 
 const router = Router();
 
+// Middleware flexible para permitir pruebas directas desde el navegador, Postman o curl sin requerir token obligatorio
+function authFlexible(req, res, next) {
+  const header = req.headers.authorization || '';
+  if (header.startsWith('Bearer ')) {
+    return requireAuth(req, res, next);
+  }
+  // Si no se envía token (ej. prueba directa por URL), permitimos la ejecución asignando rol admin para pruebas
+  req.user = { rol: 'admin', username: 'evaluador' };
+  next();
+}
+
 // ❌ VULNERABILIDAD: SQL Injection directo en la búsqueda (Fase I.B)
-router.get('/buscar', requireAuth, (req, res) => {
-  // Admin consulta cualquier carnet; estudiante solo el suyo
-  const carnet = req.user.rol === 'admin' ? req.query.carnet : req.user.carnet_estudiante;
+const buscarExpedientes = (req, res) => {
+  // Acepta el carnet directamente de query param para permitir inyecciones SQL
+  const carnet = req.query.carnet !== undefined
+    ? req.query.carnet
+    : (req.user?.rol === 'admin' ? '' : req.user?.carnet_estudiante || '');
 
   try {
     const query = `
@@ -29,9 +42,12 @@ router.get('/buscar', requireAuth, (req, res) => {
     res.json({ exito: true, datos: resultados, queryDebug: query });
   } catch (error) {
     // ❌ VULNERABILIDAD: Error 500 exponiendo traza interna y estructura de BD
-    res.status(500).json({ exito: false, error: error.message, stack: error.stack });
+    res.status(500).json({ exito: false, error: error.message, stack: error.stack, queryDebug: req.query.carnet });
   }
-});
+};
+
+router.get('/buscar', authFlexible, buscarExpedientes);
+router.get('/vulnerable', authFlexible, buscarExpedientes);
 
 // Guardar nota: protegido por rol 'admin', pero SIN restricción de campo en la calificación
 router.put('/nota', requireAuth, requireRol('admin'), (req, res) => {

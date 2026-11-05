@@ -15,17 +15,19 @@ export default function ExpedientesIU({ user }) {
   const [editandoAsignacion, setEditandoAsignacion] = useState(null);
   const [nuevaNota, setNuevaNota] = useState('');
   const [guardandoNota, setGuardandoNota] = useState(false);
+  const [queryDebug, setQueryDebug] = useState('');
 
   const consultar = async (valor) => {
     setError('');
     setAviso('');
     const data = await api(`/api/expedientes/buscar?carnet=${encodeURIComponent(valor ?? '')}`);
     setBuscado(true);
+    setQueryDebug(data.queryDebug || '');
     if (data.exito) {
-      setExpedientes(data.datos);
+      setExpedientes(data.datos || []);
     } else {
       setExpedientes([]);
-      setError(data.mensaje || 'No se pudo completar la consulta.');
+      setError(data.error || data.mensaje || 'No se pudo completar la consulta.');
     }
   };
 
@@ -82,17 +84,52 @@ export default function ExpedientesIU({ user }) {
 
       <div className="card">
         {esAdmin && (
-          <form className="toolbar" onSubmit={(e) => { e.preventDefault(); consultar(carnet); }}>
-            <input
-              className="input"
-              value={carnet}
-              onChange={(e) => setCarnet(e.target.value)}
-              placeholder="Número de carnet (ej. 0904-26-001)"
-            />
-            <button className="btn btn-with-icon" type="submit">
-              <Search size={16} /> Consultar
-            </button>
-          </form>
+          <>
+            <form className="toolbar" onSubmit={(e) => { e.preventDefault(); consultar(carnet); }}>
+              <input
+                className="input"
+                value={carnet}
+                onChange={(e) => setCarnet(e.target.value)}
+                placeholder="Número de carnet (ej. 0904-26-001)"
+              />
+              <button className="btn btn-with-icon" type="submit">
+                <Search size={16} /> Consultar
+              </button>
+            </form>
+
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+              <button
+                type="button"
+                className="btn btn-sm btn-ghost"
+                onClick={() => { setCarnet('0904-26-001'); consultar('0904-26-001'); }}
+              >
+                Consulta Normal (0904-26-001)
+              </button>
+              <button
+                type="button"
+                className="btn btn-sm btn-ghost"
+                style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }}
+                onClick={() => { const sqli = "0904-26-001' OR '1'='1"; setCarnet(sqli); consultar(sqli); }}
+              >
+                Inyección SQL: 0904-26-001' OR '1'='1
+              </button>
+              <button
+                type="button"
+                className="btn btn-sm btn-ghost"
+                style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }}
+                onClick={() => { const sqli = "' OR '1'='1"; setCarnet(sqli); consultar(sqli); }}
+              >
+                Inyección SQL: ' OR '1'='1
+              </button>
+            </div>
+          </>
+        )}
+
+        {queryDebug && (
+          <div style={{ marginBottom: 16 }}>
+            <span className="label">Consulta SQL real ejecutada en la Base de Datos:</span>
+            <pre className="terminal" style={{ margin: 0, padding: 12, fontSize: 12 }}>{queryDebug}</pre>
+          </div>
         )}
 
         {!esAdmin && promedio && (
