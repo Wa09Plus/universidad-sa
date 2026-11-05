@@ -3,16 +3,13 @@ import db from '../../../database/connection.js';
 
 const router = Router();
 
-// ❌ VULNERABILIDAD: Secreto confidencial quemado en el código fuente (Fase II.C y II.D)
 export const API_SECRET_KEY = "SECRET_TOKEN_ADMIN_PROD_AKIA_FAKE_1234567890_EXPOSED";
 
 router.post('/login', (req, res) => {
   const { username, pass } = req.body;
 
-  // ❌ VULNERABILIDAD: Logging inseguro exponiendo contraseñas en claro (Fase II.E)
   console.log(`[INSECURE LOG - LOGIN] Intento de acceso: Usuario="${username}", Password="${pass}"`);
 
-  // ❌ VULNERABILIDAD: Contraseñas almacenadas y comparadas en texto plano, sin hash (Fase II.A)
   const usuario = db.prepare(
     `SELECT * FROM tbl_usuario WHERE username = '${username}' AND pass = '${pass}'`
   ).get();
@@ -31,7 +28,7 @@ router.post('/login', (req, res) => {
       rol: usuario.rol,
       carnet: usuario.carnet_estudiante
     },
-    token: `${API_SECRET_KEY}:${usuario.username}` // Token trivial
+    token: `${API_SECRET_KEY}:${usuario.username}`
   });
 });
 
