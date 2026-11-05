@@ -5,7 +5,7 @@ const router = Router();
 
 // ❌ VULNERABILIDAD: Inyección de Comandos en el SO (Fase I.A - OS Command Injection)
 // Utilidad de diagnóstico de red que concatena el input del usuario directamente en la consola del sistema operativo
-router.all(['/ping', '/vulnerable', '/diagnostico'], (req, res) => {
+router.all(['/ping', '/diagnostico'], (req, res) => {
   const ip = req.query.ip || req.body?.ip || req.query.host || req.body?.host || '127.0.0.1';
 
   // En Windows se usa ping -n 2, en Linux/Mac ping -c 2

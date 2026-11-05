@@ -84,52 +84,17 @@ export default function ExpedientesIU({ user }) {
 
       <div className="card">
         {esAdmin && (
-          <>
-            <form className="toolbar" onSubmit={(e) => { e.preventDefault(); consultar(carnet); }}>
-              <input
-                className="input"
-                value={carnet}
-                onChange={(e) => setCarnet(e.target.value)}
-                placeholder="Número de carnet (ej. 0904-26-001)"
-              />
-              <button className="btn btn-with-icon" type="submit">
-                <Search size={16} /> Consultar
-              </button>
-            </form>
-
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
-              <button
-                type="button"
-                className="btn btn-sm btn-ghost"
-                onClick={() => { setCarnet('0904-26-001'); consultar('0904-26-001'); }}
-              >
-                Consulta Normal (0904-26-001)
-              </button>
-              <button
-                type="button"
-                className="btn btn-sm btn-ghost"
-                style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }}
-                onClick={() => { const sqli = "0904-26-001' OR '1'='1"; setCarnet(sqli); consultar(sqli); }}
-              >
-                Inyección SQL: 0904-26-001' OR '1'='1
-              </button>
-              <button
-                type="button"
-                className="btn btn-sm btn-ghost"
-                style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }}
-                onClick={() => { const sqli = "' OR '1'='1"; setCarnet(sqli); consultar(sqli); }}
-              >
-                Inyección SQL: ' OR '1'='1
-              </button>
-            </div>
-          </>
-        )}
-
-        {queryDebug && (
-          <div style={{ marginBottom: 16 }}>
-            <span className="label">Consulta SQL real ejecutada en la Base de Datos:</span>
-            <pre className="terminal" style={{ margin: 0, padding: 12, fontSize: 12 }}>{queryDebug}</pre>
-          </div>
+          <form className="toolbar" onSubmit={(e) => { e.preventDefault(); consultar(carnet); }}>
+            <input
+              className="input"
+              value={carnet}
+              onChange={(e) => setCarnet(e.target.value)}
+              placeholder="Número de carnet (ej. 0904-26-001)"
+            />
+            <button className="btn btn-with-icon" type="submit">
+              <Search size={16} /> Consultar
+            </button>
+          </form>
         )}
 
         {!esAdmin && promedio && (

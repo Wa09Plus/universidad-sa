@@ -87,8 +87,8 @@ const MODULOS = [
   {
     id: 'sistema',
     Icon: Terminal,
-    titulo: 'Diagnóstico del Servidor',
-    descripcion: 'Herramienta interna de red y ping (Vulnerable a Inyección de Comandos).',
+    titulo: 'Diagnóstico de Red',
+    descripcion: 'Herramienta de conectividad y comprobación de red.',
     roles: ['admin', 'estudiante'],
     Componente: SistemaIU
   }

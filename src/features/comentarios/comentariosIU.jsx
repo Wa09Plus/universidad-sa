@@ -86,27 +86,9 @@ export default function ComentariosIU({ user }) {
             />
           </div>
           {error && <div className="alert alert-error">{error}</div>}
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-            <button className="btn btn-with-icon" type="submit">
-              <Send size={16} /> Publicar mensaje
-            </button>
-            <button
-              type="button"
-              className="btn btn-sm btn-ghost"
-              style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }}
-              onClick={() => setMensaje('<img src="x" onerror="alert(\'Ataque XSS Ejecutado con Éxito\')" />')}
-            >
-              Cargar Payload XSS: &lt;img onerror=alert()&gt;
-            </button>
-            <button
-              type="button"
-              className="btn btn-sm btn-ghost"
-              style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }}
-              onClick={() => setMensaje('<h2 style="color:red; background:#fee; padding:10px; border-radius:8px">🔥 XSS: Inyección HTML en el Portal 🔥</h2>')}
-            >
-              Cargar Payload XSS: Inyección HTML
-            </button>
-          </div>
+          <button className="btn btn-with-icon" type="submit">
+            <Send size={16} /> Publicar mensaje
+          </button>
         </form>
 
         <div className="comment-list">
