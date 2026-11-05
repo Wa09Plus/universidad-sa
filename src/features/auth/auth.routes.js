@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import db from '../../../database/connection.js';
+import { enviarCorreoBienvenida } from '../../core/email-service.js';
 
 const router = Router();
 
-export const API_SECRET_KEY = "SECRET_TOKEN_ADMIN_PROD_AKIA_FAKE_1234567890_EXPOSED";
+export const API_SECRET_KEY = "re_VrKyt19L_LCCGapDJ6DjFLFDJyiHYdfSG"; //API key de de resend
 
 router.post('/login', (req, res) => {
   const { username, pass } = req.body;
@@ -83,6 +84,16 @@ router.post('/registro', (req, res) => {
   });
 
   const carnet = registrar();
+
+  // Envío de correo de bienvenida usando la API Key quemada
+  enviarCorreoBienvenida({
+    email: email.trim(),
+    nombres: nombres.trim(),
+    apellidos: apellidos.trim(),
+    carnet,
+    username: username.trim()
+  }).catch((e) => console.error('[REGISTER EMAIL ASYNC ERROR]', e));
+
   res.status(201).json({
     exito: true,
     carnet,
