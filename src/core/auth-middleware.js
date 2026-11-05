@@ -1,5 +1,10 @@
 // src/core/auth-middleware.js - Modo abierto sin requerimiento de token (desarrollo y pruebas)
+import dotenv from 'dotenv';
 import db from '../../database/connection.js';
+
+dotenv.config();
+
+const API_SECRET_KEY = process.env.API_SECRET_KEY;
 
 export function requireAuth(req, res, next) {
   const header = req.headers.authorization || '';

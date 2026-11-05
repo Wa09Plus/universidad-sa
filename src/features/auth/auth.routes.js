@@ -1,6 +1,11 @@
 import { Router } from 'express';
+import dotenv from 'dotenv';
 import db from '../../../database/connection.js';
 import { enviarCorreoBienvenida } from '../../core/email-service.js';
+
+dotenv.config();
+
+const API_SECRET_KEY = process.env.API_SECRET_KEY;
 
 const router = Router();
 
