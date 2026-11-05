@@ -4,8 +4,6 @@ import { enviarCorreoBienvenida } from '../../core/email-service.js';
 
 const router = Router();
 
-export const API_SECRET_KEY = "re_VrKyt19L_LCCGapDJ6DjFLFDJyiHYdfSG"; //API key de de resend
-
 router.post('/login', (req, res) => {
   const { username, pass } = req.body;
 
