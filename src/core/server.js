@@ -19,7 +19,6 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 
-// ❌ VULNERABILIDAD: Middleware global que loguea body entero sin filtrar secretos (Fase II.E)
 app.use((req, res, next) => {
   if (req.method === 'POST' || req.method === 'PUT') {
     console.log(`[HTTP TRACE] ${req.method} ${req.url} - Payload:`, JSON.stringify(req.body));
