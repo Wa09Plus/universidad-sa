@@ -31,8 +31,15 @@ export default function RegistroIU({ onRegistrado, onCancelar }) {
 
     setCargando(true);
     try {
-      const { confirmar, ...datos } = form;
-      const data = await api('/api/auth/registro', { method: 'POST', body: datos });
+      const { confirmar: _confirmar, ...datos } = form;
+      const data = await api('/api/auth/registro', {
+        method: 'POST',
+        body: {
+          ...datos,
+          email_educativo: form.email,
+          email: form.email
+        }
+      });
       if (data.exito) {
         onRegistrado(form.username, data.mensaje);
       } else {

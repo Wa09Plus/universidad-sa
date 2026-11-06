@@ -1,7 +1,10 @@
+// src/features/reportes/reportes.routes.js
+// Generación y Compresión Segura de Reportes
 import { Router } from 'express';
-import { exec } from 'child_process';
+import { execFile } from 'node:child_process';
 import db from '../../../database/connection.js';
 import { requireAuth, requireRol } from '../../core/auth-middleware.js';
+import { registrarBitacora } from '../../core/secure-logger.js';
 
 const router = Router();
 const NOTA_MINIMA = 61;
@@ -121,24 +124,96 @@ router.get('/usuarios', (req, res) => {
   res.json({ exito: true, filas, resumen });
 });
 
-// Funcionalidad para compresión y respaldo de reportes en el servidor.
-// Concatena el parámetro recibido directamente en la llamada a la consola del sistema operativo.
+// Lista blanca (Whitelist) estricta de rutas permitidas para compresión
+const ORIGENES_PERMITIDOS = {
+  'database': 'database',
+  'cursos': 'src/features/cursos',
+  'reportes': 'src/features/reportes'
+};
+
+// Mitigación de Inyección de Comandos en Sistema Operativo (Fase I.D)
+// 1. Reemplazo de exec() por execFile() sin invocación de shell (shell: false).
+// 2. Parámetros controlados en un array de argumentos (no concatenación de cadenas).
+// 3. Validación por lista blanca estricta del origen y regex del destino.
+// 4. Registro seguro de auditoría en tbl_bitacora.
 router.all('/comprimir', (req, res) => {
-  const archivo = req.query.archivo || req.body?.archivo || 'database';
-  const destino = req.query.destino || 'reportes_export.zip';
+  const ip = req.ip || req.connection?.remoteAddress || '127.0.0.1';
+  const usuario = req.user?.username || 'admin';
+  const archivoSolicitado = String(req.query.archivo || req.body?.archivo || 'database').trim();
+  const destinoSolicitado = String(req.query.destino || req.body?.destino || 'reportes_export.tar').trim();
 
-  // Ejecuta la herramienta de compresión nativa del sistema operativo (tar)
-  const comando = `tar -cf ${destino} ${archivo}`;
+  // 1. Control por lista blanca del archivo u origen
+  const rutaOrigen = ORIGENES_PERMITIDOS[archivoSolicitado];
+  if (!rutaOrigen) {
+    registrarBitacora({
+      usuario,
+      ip,
+      accion: 'COMPRESION_RECHAZADA',
+      modulo: 'REPORTES',
+      resultado: 'FALLO',
+      detalles: `Intento de acceso a recurso fuera de whitelist: ${archivoSolicitado}`
+    });
+    return res.status(400).json({
+      exito: false,
+      mensaje: `Origen no permitido. Opciones autorizadas: ${Object.keys(ORIGENES_PERMITIDOS).join(', ')}`,
+      error: 'Parámetro no autorizado'
+    });
+  }
 
-  console.log(`[OS COMMAND INJECTION] Ejecutando compresión de reporte: ${comando}`);
+  // 2. Validación estricta del nombre del archivo de destino (previene Path Traversal y caracteres shell)
+  const regexDestino = /^[a-zA-Z0-9_-]+\.(tar|zip)$/;
+  if (!regexDestino.test(destinoSolicitado)) {
+    registrarBitacora({
+      usuario,
+      ip,
+      accion: 'COMPRESION_RECHAZADA',
+      modulo: 'REPORTES',
+      resultado: 'FALLO',
+      detalles: `Nombre de archivo destino inválido: ${destinoSolicitado}`
+    });
+    return res.status(400).json({
+      exito: false,
+      mensaje: 'El nombre del archivo destino solo puede contener caracteres alfanuméricos y extensión .tar o .zip',
+      error: 'Destino inválido'
+    });
+  }
 
-  exec(comando, { timeout: 10000, maxBuffer: 1024 * 500 }, (error, stdout, stderr) => {
+  // 3. Ejecución segura mediante execFile:
+  // - shell: false garantiza que NO se invoque /bin/sh ni cmd.exe.
+  // - Los argumentos viajan en un array estricto, imposibilitando inyecciones de comandos tipo & ; | $(...)
+  const args = ['-cf', destinoSolicitado, rutaOrigen];
+
+  execFile('tar', args, { timeout: 10000, maxBuffer: 1024 * 500, shell: false }, (error, stdout, stderr) => {
+    if (error) {
+      registrarBitacora({
+        usuario,
+        ip,
+        accion: 'COMPRESION_FALLIDA',
+        modulo: 'REPORTES',
+        resultado: 'ERROR',
+        detalles: `Fallo al comprimir ${archivoSolicitado}: ${error.message}`
+      });
+      return res.status(500).json({
+        exito: false,
+        mensaje: 'Error durante el proceso de compresión',
+        error: error.message
+      });
+    }
+
+    registrarBitacora({
+      usuario,
+      ip,
+      accion: 'COMPRESION_EXITOSA',
+      modulo: 'REPORTES',
+      resultado: 'EXITO',
+      detalles: `Compresión segura de ${archivoSolicitado} a ${destinoSolicitado}`
+    });
+
     res.json({
-      exito: !error,
-      mensaje: error ? 'Error al comprimir reporte' : 'Reporte comprimido con éxito',
-      comandoEjecutado: comando,
-      salida: (stdout || '') + (stderr || '') || (error ? error.message : 'Archivo de reporte comprimido generado en el servidor.'),
-      error: error ? error.message : null
+      exito: true,
+      mensaje: 'Reporte comprimido con éxito de forma segura',
+      destino: destinoSolicitado,
+      salida: stdout || stderr || 'Archivo generado correctamente en el servidor.'
     });
   });
 });

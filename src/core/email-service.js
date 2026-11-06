@@ -1,47 +1,36 @@
-// src/core/email-service.js - Servicio de notificaciones por correo
+// src/core/email-service.js
+// Servicio de Notificaciones por Correo Electrónico
 import { Resend } from 'resend';
+import dotenv from 'dotenv';
+dotenv.config();
 
-// ❌ VULNERABILIDAD (Fase II.C y II.D):
-// Secreto sensible de producción quemado directamente en el código fuente.
-// En un entorno seguro esto debe obtenerse vía process.env.RESEND_API_KEY.
-export const RESEND_API_KEY = "re_a1b2c3d4_k8F9wL2mQ0xZ5vP3nY7tJ1aC";
+// Gestión de Secretos: Cargado dinámicamente de variables de entorno
+const resendApiKey = process.env.RESEND_API_KEY || 're_mock_key_2026';
+const resend = new Resend(resendApiKey);
 
-const resend = new Resend(RESEND_API_KEY);
-
-/**
- * Envía un correo real de bienvenida con el carnet generado al registrarse un estudiante.
- */
-export async function enviarCorreoBienvenida({ email, nombres, apellidos, carnet, username }) {
-  console.log(`[EMAIL SERVICE] Intentando enviar notificación de bienvenida a: ${email}`);
-
+export async function enviarCorreoBienvenida({ email, nombres, carnet, carrera }) {
   try {
-    const { data, error } = await resend.emails.send({
-      from: 'Universidad App <onboarding@resend.dev>',
+    const data = await resend.emails.send({
+      from: 'Universidad SA <onboarding@resend.dev>',
       to: [email],
-      subject: `🎓 ¡Bienvenido a la Universidad! Tu Carnet Oficial es ${carnet}`,
+      subject: '¡Bienvenido a Universidad SA! - Tu portal académico',
       html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px; color: #1e293b;">
-          <h2>¡Hola, ${nombres} ${apellidos}!</h2>
-          <p>Tu cuenta ha sido creada exitosamente en el <b>Portal Académico Universitario</b>.</p>
-          <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <p style="margin: 5px 0;"><b>Carnet Oficial:</b> <span style="font-family: monospace; font-size: 16px; color: #1e3a8a;">${carnet}</span></p>
-            <p style="margin: 5px 0;"><b>Usuario de acceso:</b> ${username}</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #1e3a8a;">¡Bienvenido, ${nombres}!</h2>
+          <p>Tu cuenta estudiantil ha sido creada exitosamente con los siguientes datos:</p>
+          <div style="background-color: #f1f5f9; padding: 15px; border-radius: 8px;">
+            <p><strong>Número de Carnet:</strong> ${carnet}</p>
+            <p><strong>Correo Educativo:</strong> ${email}</p>
+            <p><strong>Carrera:</strong> ${carrera}</p>
           </div>
-          <p>Ya puedes iniciar sesión en el portal y proceder con la asignación de tus materias.</p>
+          <p style="margin-top: 20px; font-size: 12px; color: #64748b;">
+            Este mensaje es una notificación automática del sistema universitario.
+          </p>
         </div>
       `
     });
-
-    if (error) {
-      console.error('[EMAIL SERVICE ERROR]', error);
-      return { exito: false, error };
-    }
-
-    console.log('[EMAIL SERVICE SUCCESS] Correo entregado ID:', data.id);
-    return { exito: true, data };
-  } catch (err) {
-    console.error('[EMAIL SERVICE EXCEPTION]', err.message);
-    return { exito: false, error: err.message };
+    return { exito: true, id: data.id };
+  } catch (error) {
+    return { exito: false, error: error.message };
   }
 }
-

@@ -1,3 +1,5 @@
+// src/core/server.js
+// Servidor Principal Express con Configuración Segura
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -14,19 +16,12 @@ import asignacionesRouter from '../features/asignaciones/asignaciones.routes.js'
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
-app.use((req, res, next) => {
-  if (req.method === 'POST' || req.method === 'PUT') {
-    console.log(`[HTTP TRACE] ${req.method} ${req.url} - Payload:`, JSON.stringify(req.body));
-  }
-  next();
-});
-
-// Montaje de módulos
+// Montaje de módulos de la API
 app.use('/api/auth', authRouter);
 app.use('/api/expedientes', expedientesRouter);
 app.use('/api/comentarios', comentariosRouter);
@@ -37,5 +32,5 @@ app.use('/api/cursos', cursosRouter);
 app.use('/api/asignaciones', asignacionesRouter);
 
 app.listen(PORT, () => {
-  console.log(`🔥 Servidor VULNERABLE escuchando en http://localhost:${PORT}`);
+  console.log(`[INFO] Servidor Universidad SA seguro escuchando en http://localhost:${PORT}`);
 });

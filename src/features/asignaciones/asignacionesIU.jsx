@@ -7,36 +7,19 @@ export default function AsignacionesIU({ user }) {
   const esAdmin = user.rol === 'admin';
   const [carnetBuscar, setCarnetBuscar] = useState(user.carnet || '');
   const [estudiantesLista, setEstudiantesLista] = useState([]);
-  
+
   const [estudianteInfo, setEstudianteInfo] = useState(null);
   const [asignaciones, setAsignaciones] = useState([]);
   const [disponibles, setDisponibles] = useState([]);
   const [ciclos, setCiclos] = useState(['Ciclo I', 'Ciclo II']);
-  
+
   const [idCursoSel, setIdCursoSel] = useState('');
   const [cicloSel, setCicloSel] = useState('Ciclo I');
   const [añoSel, setAñoSel] = useState(new Date().getFullYear());
-  
+
   const [error, setError] = useState('');
   const [aviso, setAviso] = useState('');
   const [cargando, setCargando] = useState(false);
-
-  // Si es admin, cargar la lista de estudiantes para poder seleccionarlos
-  useEffect(() => {
-    if (esAdmin) {
-      api('/api/estudiantes').then((res) => {
-        if (res.exito && res.estudiantes?.length > 0) {
-          setEstudiantesLista(res.estudiantes);
-          if (!carnetBuscar) {
-            setCarnetBuscar(res.estudiantes[0].carnet_estudiante);
-            cargarAsignaciones(res.estudiantes[0].carnet_estudiante);
-          }
-        }
-      });
-    } else {
-      cargarAsignaciones(user.carnet);
-    }
-  }, [esAdmin]);
 
   const cargarAsignaciones = async (carnet) => {
     if (!carnet) return;
@@ -64,6 +47,23 @@ export default function AsignacionesIU({ user }) {
       setCargando(false);
     }
   };
+
+  // Si es admin, cargar la lista de estudiantes para poder seleccionarlos
+  useEffect(() => {
+    if (esAdmin) {
+      api('/api/estudiantes').then((res) => {
+        if (res.exito && res.estudiantes?.length > 0) {
+          setEstudiantesLista(res.estudiantes);
+          if (!carnetBuscar) {
+            setCarnetBuscar(res.estudiantes[0].carnet_estudiante);
+            cargarAsignaciones(res.estudiantes[0].carnet_estudiante);
+          }
+        }
+      });
+    } else {
+      cargarAsignaciones(user.carnet);
+    }
+  }, [esAdmin]);
 
   const handleAsignar = async (e) => {
     e.preventDefault();
