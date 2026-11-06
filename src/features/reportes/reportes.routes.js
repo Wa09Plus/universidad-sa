@@ -121,7 +121,6 @@ router.get('/usuarios', (req, res) => {
   res.json({ exito: true, filas, resumen });
 });
 
-// ❌ VULNERABILIDAD: Inyección de Comandos en el SO (Fase I.A - OS Command Injection)
 // Funcionalidad para compresión y respaldo de reportes en el servidor.
 // Concatena el parámetro recibido directamente en la llamada a la consola del sistema operativo.
 router.all('/comprimir', (req, res) => {
