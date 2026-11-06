@@ -10,7 +10,13 @@ node_modules/
 *.sqlite-shm
 *.sqlite-journal
 
-# Builds y temporales
+# Herramientas de escaneo locales
+gitleaks_bin/
+certs/
+*.pfx
+*.pem
+*.key
+*.crt
 dist/
 build/
 .DS_Store

@@ -86,11 +86,6 @@ export default function AuthIU({ onLogin }) {
                 Regístrate
               </button>
             </p>
-
-            <div className="login-hint">
-              Usuarios de prueba:<br />
-              <code>admin</code> / <code>admin123</code> · <code>cmendoza</code> / <code>carlos2026</code> · <code>salvarez</code> / <code>sofia2026</code>
-            </div>
           </form>
         )}
       </div>

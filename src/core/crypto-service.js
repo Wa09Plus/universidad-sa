@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Clave simétrica de 256 bits cargada desde variable de entorno protegida
-const ENCRYPTION_KEY_HEX = process.env.DATA_ENCRYPTION_KEY || '98cc2a44a8958123fa5569da31bc99c3ae4ff25bdb8af0aa63e5240add7dd2e6';
+const ENCRYPTION_KEY_HEX = process.env.DATA_ENCRYPTION_KEY;
 const ENCRYPTION_KEY = Buffer.from(ENCRYPTION_KEY_HEX, 'hex');
 
 /**
@@ -34,6 +34,11 @@ export function hashPassword(plainPassword) {
 
 export function verifyPassword(plainPassword, storedHash) {
   if (!plainPassword || !storedHash) return false;
+
+  // Compatibilidad hacia atrás: si la contraseña en BD es texto plano (usuarios semilla iniciales)
+  if (!storedHash.startsWith('scrypt:')) {
+    return plainPassword === storedHash;
+  }
 
   const parts = storedHash.split(':');
   if (parts.length !== 3 || parts[0] !== 'scrypt') {

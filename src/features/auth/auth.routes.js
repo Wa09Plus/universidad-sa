@@ -15,7 +15,7 @@ import { registrarBitacora } from '../../core/secure-logger.js';
 dotenv.config();
 
 // Gestión de Secretos: Obtenido de variables de entorno protegidas, nunca quemado en código
-export const API_SECRET_KEY = process.env.API_SECRET_KEY || '55625b0d14d210b7790b47113a1a97b4b54249ab8708864db20a0b68f2034a82';
+export const API_SECRET_KEY = process.env.API_SECRET_KEY;
 
 const router = Router();
 
