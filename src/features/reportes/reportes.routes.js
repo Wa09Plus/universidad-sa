@@ -160,7 +160,7 @@ router.all('/comprimir', (req, res) => {
     });
   }
 
-  // 2. Validación estricta del nombre del archivo de destino (previene Path Traversal y caracteres shell)
+  // 2. Validación estricta del nombre del archivo de destino
   const regexDestino = /^[a-zA-Z0-9_-]+\.(tar|zip)$/;
   if (!regexDestino.test(destinoSolicitado)) {
     registrarBitacora({
@@ -179,8 +179,6 @@ router.all('/comprimir', (req, res) => {
   }
 
   // 3. Ejecución segura mediante execFile:
-  // - shell: false garantiza que NO se invoque /bin/sh ni cmd.exe.
-  // - Los argumentos viajan en un array estricto, imposibilitando inyecciones de comandos tipo & ; | $(...)
   const args = ['-cf', destinoSolicitado, rutaOrigen];
 
   execFile('tar', args, { timeout: 10000, maxBuffer: 1024 * 500, shell: false }, (error, stdout, stderr) => {

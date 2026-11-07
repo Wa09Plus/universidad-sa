@@ -1,5 +1,5 @@
 // src/core/server.js
-// Servidor Principal Express con Configuración Segura
+// Servidor Principal Express con Configuración Segura y Soporte TLS/HTTPS
 import http from 'node:http';
 import https from 'node:https';
 import fs from 'node:fs';
@@ -21,9 +21,16 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const HTTPS_PORT = process.env.HTTPS_PORT || 3443;
 
 app.use(cors());
 app.use(express.json());
+
+// Endurecimiento de Seguridad: HTTP Strict Transport Security (HSTS)
+app.use((req, res, next) => {
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  next();
+});
 
 // Montaje de módulos de la API
 app.use('/api/auth', authRouter);
@@ -35,22 +42,22 @@ app.use('/api/reportes', reportesRouter);
 app.use('/api/cursos', cursosRouter);
 app.use('/api/asignaciones', asignacionesRouter);
 
-// Inicio del servidor: Soporte dual HTTP (desarrollo local) y HTTPS / TLS 1.3
-const USE_HTTPS = process.env.HTTPS_ENABLED === 'true';
-const PFX_PATH = path.join(process.cwd(), 'certs', 'localhost.pfx');
+// Certificados para Cifrado en Tránsito (TLS 1.2 / TLS 1.3)
+const KEY_PATH = path.join(process.cwd(), 'certs', 'server.key');
+const CERT_PATH = path.join(process.cwd(), 'certs', 'server.crt');
 
-if (USE_HTTPS && fs.existsSync(PFX_PATH)) {
+if (fs.existsSync(KEY_PATH) && fs.existsSync(CERT_PATH)) {
   const tlsOptions = {
-    pfx: fs.readFileSync(PFX_PATH),
-    passphrase: process.env.PFX_PASSWORD || 'temporal123',
-    minVersion: 'TLSv1.2' // Exige TLS 1.2 o TLS 1.3
+    key: fs.readFileSync(KEY_PATH),
+    cert: fs.readFileSync(CERT_PATH),
+    minVersion: 'TLSv1.2'
   };
 
-  https.createServer(tlsOptions, app).listen(PORT, () => {
-    console.log(`[INFO] Servidor Universidad SA SEGURO corriendo bajo HTTPS (TLS 1.3/1.2) en https://localhost:${PORT}`);
-  });
-} else {
-  http.createServer(app).listen(PORT, () => {
-    console.log(`[INFO] Servidor Universidad SA corriendo en http://localhost:${PORT} (Modo HTTP estándar)`);
+  https.createServer(tlsOptions, app).listen(HTTPS_PORT, () => {
+    console.log(`[INFO] Servidor HTTPS seguro (TLS 1.2/1.3) escuchando en https://localhost:${HTTPS_PORT}`);
   });
 }
+
+http.createServer(app).listen(PORT, () => {
+  console.log(`[INFO] Servidor HTTP escuchando en http://localhost:${PORT}`);
+});
