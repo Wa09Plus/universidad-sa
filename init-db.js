@@ -3,7 +3,7 @@
 import db from './database/connection.js';
 import { hashPassword, cifrarDPI } from './src/core/crypto-service.js';
 
-console.log('🔄 Inicializando base de datos segura de Universidad SA...');
+console.log('[INFO] Inicializando base de datos segura de Universidad SA...');
 
 // Eliminación ordenada de tablas existentes
 db.exec(`
@@ -156,4 +156,4 @@ const poblarBase = db.transaction(() => {
 });
 
 poblarBase();
-console.log('✅ Base de datos recreada exitosamente con 8 tablas seguras y protegidas.');
+console.log('[OK] Base de datos recreada exitosamente con 8 tablas seguras y protegidas.');

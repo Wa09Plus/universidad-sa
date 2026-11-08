@@ -172,7 +172,7 @@ export default function ExpedientesIU({ user }) {
                                 setNuevaNota('');
                               }}
                             >
-                              ✕
+                              X
                             </button>
                           </div>
                         ) : (

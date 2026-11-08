@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
-console.log('🔒 Generando par de claves criptográficas RSA-2048 y certificado X.509 para TLS...');
+console.log('[INFO] Generando par de claves criptográficas RSA-2048 y certificado X.509 para TLS...');
 
 // 1. Generar par de claves RSA de 2048 bits
 const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
@@ -72,7 +72,7 @@ if (!fs.existsSync(certsDir)) {
 fs.writeFileSync(path.join(certsDir, 'server.key'), privateKey);
 fs.writeFileSync(path.join(certsDir, 'server.crt'), certPem);
 
-console.log('✅ Certificado TLS y Clave Privada generados exitosamente:');
-console.log('   📄 Certificado X.509: certs/server.crt');
-console.log('   🔑 Clave Privada RSA: certs/server.key');
+console.log('[OK] Certificado TLS y Clave Privada generados exitosamente:');
+console.log('   - Certificado X.509: certs/server.crt');
+console.log('   - Clave Privada RSA: certs/server.key');
 

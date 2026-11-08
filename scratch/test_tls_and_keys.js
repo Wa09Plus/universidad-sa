@@ -14,7 +14,7 @@ const keyPath = path.resolve('certs/server.key');
 const certPath = path.resolve('certs/server.crt');
 
 if (!fs.existsSync(keyPath) || !fs.existsSync(certPath)) {
-  console.error('❌ Certificados TLS no encontrados. Ejecuta: node generate_certs.js');
+  console.error('[ERROR] Certificados TLS no encontrados. Ejecuta: node generate_certs.js');
   process.exit(1);
 }
 
@@ -23,7 +23,7 @@ const certPem = fs.readFileSync(certPath, 'utf8');
 
 // 1.1 Inspección y Validación del Certificado X.509
 const x509 = new crypto.X509Certificate(certPem);
-console.log('📄 Certificado X.509 Verificado:');
+console.log('[INFO] Certificado X.509 Verificado:');
 console.log('   * Sujeto (Subject):', x509.subject);
 console.log('   * Emisor (Issuer):', x509.issuer);
 console.log('   * Algoritmo Criptográfico de Firma:', x509.signatureAlgorithm);
@@ -37,7 +37,7 @@ const serverContext = tls.createSecureContext({
   minVersion: 'TLSv1.2'
 });
 
-console.log('\n🔒 Parámetros de la Conexión TLS en Node.js:');
+console.log('\n[INFO] Parámetros de la Conexión TLS en Node.js:');
 console.log('   * Versión Mínima Permitida: TLSv1.2 (Bloquea SSLv3, TLS 1.0 y 1.1 inseguros)');
 console.log('   * Protocolos Soportados: TLSv1.2 y TLSv1.3');
 console.log('   * Algoritmo Asimétrico: RSA 2048 bits para autenticación');
@@ -82,4 +82,4 @@ console.log('   2. Generación: Nueva clave simétrica de 256 bits mediante CSPR
 console.log('   3. Re-cifrado: Script de migración re-cifra registros en BD usando la nueva clave.');
 console.log('   4. Despliegue: Se actualiza DATA_ENCRYPTION_KEY en variables de entorno y se destruye la clave anterior.');
 
-console.log('\n✅ Demostración completada con éxito.');
+console.log('\n[OK] Demostración completada con éxito.');
