@@ -8,17 +8,17 @@
 
 Para levantar el proyecto localmente y evaluar todas las implementaciones de seguridad, sigue estos pasos:
 
-### 1. Clonar el repositorio y ubicarse en la rama de seguridad
+### 1. Clonar el repositorio y ubicarse en la rama main
 ```bash
 git clone https://github.com/Wa09Plus/universidad-sa.git
 cd universidad-sa
 
-### 1.1 Si desea ver la versión inical del proyecto utilizar la rama "main" en caso desee verla con implementaciones ejecutar  lo siguiente:
+### 1.1 Si desea ver la versión inicial del proyecto utilizar la rama "sin_implementaciones" en caso desee verla sin implementaciones seguras ejecutar lo siguiente:
 
-git checkout implementaciones_seguras
+git checkout sin_implementaciones
 
 ```
-*(la rama `implementaciones_seguras` es donde se encuentran todos los controles y parches de seguridad implementados).*
+*(la rama `main` es donde se encuentran todos los controles y parches de seguridad implementados).*
 
 ### 2. Instalar dependencias
 Requiere **Node.js v18** o superior (recomendado Node v20 o v24):
@@ -61,6 +61,7 @@ Una vez levantado el entorno:
   `http://localhost:3000/api`
 
 ---
+## Para visualizar la Base de datos se recomienda la extensión "SQLite Viewer".
 
 ## Credenciales de Acceso para Evaluación
 
