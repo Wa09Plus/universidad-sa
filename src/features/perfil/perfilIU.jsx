@@ -85,7 +85,7 @@ export default function PerfilIU({ user }) {
                 <Dato etiqueta="DPI" valor={e.DPI} />
               </>
             ) : (
-              <p className="empty">Esta cuenta no tiene un registro en la tabla maestra de estudiantes.</p>
+              <p className="empty">Esta cuenta no tiene un registro de estudiante.</p>
             )}
           </div>
         </div>
