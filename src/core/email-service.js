@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Gestión de Secretos: Cargado dinámicamente de variables de entorno
-const resendApiKey = process.env.RESEND_API_KEY || 're_mock_key_2026';
+const resendApiKey = process.env.RESEND_API_KEY;
 const resend = new Resend(resendApiKey);
 
 export async function enviarCorreoBienvenida({ email, nombres, carnet, carrera }) {
