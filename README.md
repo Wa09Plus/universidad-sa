@@ -61,6 +61,7 @@ Una vez levantado el entorno:
   `http://localhost:3000/api`
 
 ---
+## Para visualizar la Base de datos se recomienda la extensión "SQLite Viewer".
 
 ## Credenciales de Acceso para Evaluación
 
