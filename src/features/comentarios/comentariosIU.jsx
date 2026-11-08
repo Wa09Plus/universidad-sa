@@ -7,7 +7,7 @@ export default function ComentariosIU({ user }) {
   const esAdmin = user.rol === 'admin';
   const [comentarios, setComentarios] = useState([]);
   const [estudiantes, setEstudiantes] = useState([]);
-  const [carnet, setCarnet] = useState(user.carnet || '');
+  const [carnet, setCarnet] = useState(user.carnet || user.carnet_estudiante || '');
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
 
@@ -22,21 +22,30 @@ export default function ComentariosIU({ user }) {
     // El admin elige a qué estudiante va dirigido su comentario
     if (esAdmin) {
       api('/api/estudiantes').then((data) => {
-        if (data.exito) {
+        if (data.exito && data.estudiantes?.length > 0) {
           setEstudiantes(data.estudiantes);
-          if (data.estudiantes.length) setCarnet(data.estudiantes[0].carnet);
+          const primerCarnet = data.estudiantes[0].carnet_estudiante || data.estudiantes[0].carnet;
+          setCarnet(primerCarnet);
         }
       });
+    } else {
+      setCarnet(user.carnet || user.carnet_estudiante || '');
     }
-  }, [esAdmin]);
+  }, [esAdmin, user.carnet, user.carnet_estudiante]);
 
   const publicar = async (e) => {
     e.preventDefault();
     if (!mensaje.trim()) return;
     setError('');
+
+    const carnetDestino = carnet || user.carnet || user.carnet_estudiante || (estudiantes[0] ? (estudiantes[0].carnet_estudiante || estudiantes[0].carnet) : '');
+    if (!carnetDestino) {
+      return setError('Debes indicar un carnet de estudiante válido.');
+    }
+
     const data = await api('/api/comentarios', {
       method: 'POST',
-      body: { carnet_estudiante: carnet, autor: user.username, mensaje }
+      body: { carnet_estudiante: carnetDestino, autor: user.username, mensaje }
     });
     if (!data.exito) return setError(data.mensaje || 'No se pudo publicar el comentario.');
     setMensaje('');
@@ -64,11 +73,14 @@ export default function ComentariosIU({ user }) {
               <label className="label">{esAdmin ? 'Dirigido al estudiante' : 'Carnet'}</label>
               {esAdmin ? (
                 <select className="input" value={carnet} onChange={(e) => setCarnet(e.target.value)}>
-                  {estudiantes.map((s) => (
-                    <option key={s.carnet} value={s.carnet}>
-                      {s.carnet} · {s.nombres} {s.apellidos}
-                    </option>
-                  ))}
+                  {estudiantes.map((s) => {
+                    const c = s.carnet_estudiante || s.carnet;
+                    return (
+                      <option key={c} value={c}>
+                        {c} · {s.nombres} {s.apellidos}
+                      </option>
+                    );
+                  })}
                 </select>
               ) : (
                 <input className="input" value={carnet} disabled />
@@ -100,7 +112,10 @@ export default function ComentariosIU({ user }) {
                 <div className="comment-meta">
                   <b>{c.autor}</b>{c.timestamp} · Carnet {c.carnet_estudiante}
                 </div>
-                <div dangerouslySetInnerHTML={{ __html: c.mensaje }} />
+
+                <div className="comment-text" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                  {c.mensaje}
+                </div>
               </div>
             </div>
           ))}

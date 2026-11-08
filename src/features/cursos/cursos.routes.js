@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import db from '../../../database/connection.js';
 import { requireAuth, requireRol } from '../../core/auth-middleware.js';
+import { sanitizarTextoPlano } from '../../core/validators.js';
+import { registrarBitacora } from '../../core/secure-logger.js';
 
 const router = Router();
 
@@ -34,14 +36,33 @@ router.get('/', (req, res) => {
   res.json({ exito: true, cursos });
 });
 
-// Creación de cursos: solo rol admin, pero sin restricciones en los campos de entrada
+// Creación de cursos: solo rol admin con validaciones y registro en bitácora
 router.post('/', requireRol('admin'), (req, res) => {
   const { id_carrera, nombre_curso, horario, catedratico } = req.body || {};
+  const ip = req.ip || req.connection?.remoteAddress || '127.0.0.1';
+  const usuario = req.user?.username || 'admin';
+
+  const nomCursoLimpio = sanitizarTextoPlano(nombre_curso, 100);
+  const horarioLimpio = sanitizarTextoPlano(horario, 50);
+  const catedraticoLimpio = sanitizarTextoPlano(catedratico, 100);
+
+  if (!id_carrera || !nomCursoLimpio) {
+    return res.status(400).json({ exito: false, mensaje: 'Carrera y nombre del curso son requeridos.' });
+  }
 
   const { lastInsertRowid } = db.prepare(`
     INSERT INTO tbl_cursos (id_carrera, nombre_curso, horario, catedratico)
     VALUES (?, ?, ?, ?)
-  `).run(id_carrera, nombre_curso, horario, catedratico);
+  `).run(id_carrera, nomCursoLimpio, horarioLimpio, catedraticoLimpio);
+
+  registrarBitacora({
+    usuario,
+    ip,
+    accion: 'CREAR_CURSO',
+    modulo: 'CURSOS',
+    resultado: 'EXITO',
+    detalles: `Curso creado ID ${lastInsertRowid}: ${nomCursoLimpio}`
+  });
 
   res.status(201).json({ exito: true, id_curso: lastInsertRowid, mensaje: 'Curso creado' });
 });

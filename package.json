@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "start": "npm run dev",
     "client": "vite",
     "server": "nodemon src/core/server.js",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
@@ -16,6 +17,7 @@
     "cors": "^2.8.6",
     "dotenv": "^18.0.9",
     "express": "^5.3.0",
+    "gitleaks": "^1.0.0",
     "lucide-react": "^1.67.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",

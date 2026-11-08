@@ -116,15 +116,8 @@ function Bienvenida({ user, modulos, onNavegar }) {
   );
 }
 
-const USUARIO_DEFAULT = {
-  id: 1,
-  username: 'admin',
-  rol: 'admin',
-  carnet: null
-};
-
 export default function App() {
-  const [user, setUser] = useState(USUARIO_DEFAULT);
+  const [user, setUser] = useState(null);
   const [vista, setVista] = useState('inicio');
 
   const handleLogin = (usuario, token) => {

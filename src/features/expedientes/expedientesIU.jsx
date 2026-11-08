@@ -15,14 +15,12 @@ export default function ExpedientesIU({ user }) {
   const [editandoAsignacion, setEditandoAsignacion] = useState(null);
   const [nuevaNota, setNuevaNota] = useState('');
   const [guardandoNota, setGuardandoNota] = useState(false);
-  const [queryDebug, setQueryDebug] = useState('');
 
   const consultar = async (valor) => {
     setError('');
     setAviso('');
     const data = await api(`/api/expedientes/buscar?carnet=${encodeURIComponent(valor ?? '')}`);
     setBuscado(true);
-    setQueryDebug(data.queryDebug || '');
     if (data.exito) {
       setExpedientes(data.datos || []);
     } else {

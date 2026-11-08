@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import db from '../../../database/connection.js';
 import { requireAuth } from '../../core/auth-middleware.js';
+import { validarCarnet } from '../../core/validators.js';
+import { registrarBitacora } from '../../core/secure-logger.js';
 
 const router = Router();
 
@@ -16,12 +18,17 @@ router.get('/', (req, res) => {
     return res.status(400).json({ exito: false, mensaje: 'Indica el carnet del estudiante' });
   }
 
+  const valCarnet = validarCarnet(carnet);
+  if (!valCarnet.valido) {
+    return res.status(400).json({ exito: false, mensaje: valCarnet.mensaje });
+  }
+
   const estudiante = db.prepare(`
     SELECT m.carnet_estudiante, m.nombres, m.apellidos, m.id_carrera, ca.nombre_carrera
     FROM TM_estudiante m
     JOIN ct_carreras ca ON ca.id_carrera = m.id_carrera
     WHERE m.carnet_estudiante = ?
-  `).get(carnet);
+  `).get(valCarnet.valor);
 
   if (!estudiante) {
     return res.status(404).json({ exito: false, mensaje: 'Estudiante no encontrado' });
@@ -36,7 +43,7 @@ router.get('/', (req, res) => {
     LEFT JOIN tbl_expedientes e ON e.id_asignacion = a.id_asignacion
     WHERE a.carnet_estudiante = ?
     ORDER BY a.año DESC, a.ciclo, c.nombre_curso
-  `).all(carnet);
+  `).all(valCarnet.valor);
 
   const disponibles = db.prepare(`
     SELECT id_curso, nombre_curso, horario, catedratico
@@ -48,23 +55,42 @@ router.get('/', (req, res) => {
   res.json({ exito: true, estudiante, asignaciones, disponibles, ciclos: ['Ciclo I', 'Ciclo II'] });
 });
 
-// Asignar curso: respeta el rol de quién lo asigna, pero sin restricciones en los valores
+// Asignar curso
 router.post('/', (req, res) => {
   const carnet = carnetObjetivo(req, req.body?.carnet_estudiante);
-  const idCurso = req.body?.id_curso;
-  const ciclo = req.body?.ciclo || 'Ciclo I';
-  const año = req.body?.año || 2026;
+  const idCurso = Number(req.body?.id_curso);
+  const ciclo = String(req.body?.ciclo || 'Ciclo I').slice(0, 20);
+  const año = Number(req.body?.año || 2026);
+  const ip = req.ip || req.connection?.remoteAddress || '127.0.0.1';
+  const usuario = req.user?.username || 'usuario';
+
+  const valCarnet = validarCarnet(carnet);
+  if (!valCarnet.valido || !Number.isInteger(idCurso)) {
+    return res.status(400).json({ exito: false, mensaje: 'Datos de asignación inválidos' });
+  }
 
   db.prepare(`
     INSERT INTO tbl_asignaciones (carnet_estudiante, id_curso, ciclo, año)
     VALUES (?, ?, ?, ?)
-  `).run(carnet, idCurso, ciclo, año);
+  `).run(valCarnet.valor, idCurso, ciclo, año);
 
-  res.status(201).json({ exito: true, mensaje: 'Curso asignado' });
+  registrarBitacora({
+    usuario,
+    ip,
+    accion: 'ASIGNAR_CURSO',
+    modulo: 'ASIGNACIONES',
+    resultado: 'EXITO',
+    detalles: `Estudiante ${valCarnet.valor} asignado al curso ID ${idCurso}`
+  });
+
+  res.status(201).json({ exito: true, mensaje: 'Curso asignado exitosamente' });
 });
 
 // Eliminar asignación
 router.delete('/:id', (req, res) => {
+  const ip = req.ip || req.connection?.remoteAddress || '127.0.0.1';
+  const usuario = req.user?.username || 'usuario';
+
   const asignacion = db.prepare(`
     SELECT a.carnet_estudiante, e.id_expediente
     FROM tbl_asignaciones a
@@ -80,6 +106,16 @@ router.delete('/:id', (req, res) => {
   }
 
   db.prepare('DELETE FROM tbl_asignaciones WHERE id_asignacion = ?').run(req.params.id);
+
+  registrarBitacora({
+    usuario,
+    ip,
+    accion: 'ELIMINAR_ASIGNACION',
+    modulo: 'ASIGNACIONES',
+    resultado: 'EXITO',
+    detalles: `Asignación ID ${req.params.id} eliminada para carnet ${asignacion.carnet_estudiante}`
+  });
+
   res.json({ exito: true, mensaje: 'Asignación eliminada' });
 });
 
